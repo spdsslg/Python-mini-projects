@@ -1,0 +1,9 @@
+# Ignore build artifacts
+/build/
+/*.exe
+/*.o
+/*.obj
+
+# Add any IDE/editor files you want to ignore:
+*.swp
+*.vscode/
