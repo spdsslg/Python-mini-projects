@@ -49,13 +49,14 @@ class Task:
     
     
     def save(self, connection):
-        if(self.name_duplicate_check(connection)):
-            print(f"Oops... a task like {self.name} already exists!")
-            return
 
         cursor = connection.cursor()
 
         if(self.id is None):   #this is executed if the object is not yet in the database
+            if(self.name_duplicate_check(connection)):
+                print(f"Oops... a task like '{self.name}' already exists!")
+                return
+            
             cursor.execute("""
                         INSERT INTO tasks(name,done) VALUES(?,?); 
                         """, (self.name, int(self.done))) #creating a new row
@@ -84,18 +85,18 @@ class Task:
     def mark_as_done(self, connection):
         if(not self.done):
             self.done = True
-            print(f"Task {self.id} with name {self.name} is successfully marked as DONE")
+            print(f"Task {self.id} with name '{self.name}' is successfully marked as DONE")
             self.save(connection)
         else:
-            print(f"Task {self.id} with name {self.name} is ALREADY marked as DONE!")
+            print(f"Task {self.id} with name '{self.name}' is ALREADY marked as DONE!")
     
     def mark_as_undone(self, connection):
         if(self.done):
             self.done = False
-            print(f"Task {self.id} with name {self.name} is successfully marked as UNDONE")
+            print(f"Task {self.id} with name '{self.name}' is successfully marked as UNDONE")
             self.save(connection)
         else:
-            print(f"Task {self.id} with name {self.name} is ALREADY marked as UNDONE!")
+            print(f"Task {self.id} with name '{self.name}' is ALREADY marked as UNDONE!")
 
     def delete_task(self, connection):
         cursor = connection.cursor()
@@ -181,6 +182,8 @@ def find_task_by_name(connection, key_name):
 
 def print_all_table(connection):
     table = Task.all(connection)
+    if(not table):
+        print("Currently there are no tasks to list!")
     for task in table:
         print(task)
 
@@ -230,6 +233,27 @@ def main():
             new_name = str(input())
             new_task = Task(new_name)
             new_task.save(connect)
+
+        elif(choice == '5'):
+            print("Enter a name of the task you want to mark as done: ",end='')
+            done_name = str(input())
+            done_task = find_task_by_name(connect, done_name)
+            if(not done_task):
+                print(f"There is no such task as '{done_task}' in a list!")
+                continue
+            else:
+                done_task.mark_as_done(connect)
+
+        elif(choice == '6'):
+            print("Enter a name of the task you want to mark as undone: ",end='')
+            undone_name = str(input())
+            undone_task = find_task_by_name(connect, undone_name)
+            if(not undone_task):
+                print(f"There is no such task as '{undone_task}' in a list!")
+                continue
+            else:
+                undone_task.mark_as_undone(connect)
+            
 
         elif(choice == '7'):
             print("Enter a name of the task you want to delete: ",end='')
