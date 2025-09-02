@@ -189,7 +189,7 @@ def print_all_table(connection):
 
 
 def main():
-    connect = establish_connection("./mini_projects/mini_project_week1/todo.sqlite") 
+    connect = establish_connection("./mini_project_week1/todo.sqlite") 
     create_table(connect)
 
     choice = ''
@@ -239,8 +239,7 @@ def main():
             done_name = str(input())
             done_task = find_task_by_name(connect, done_name)
             if(not done_task):
-                print(f"There is no such task as '{done_task}' in a list!")
-                continue
+                print(f"There is no such task as '{done_name}' in a list!")
             else:
                 done_task.mark_as_done(connect)
 
@@ -249,8 +248,8 @@ def main():
             undone_name = str(input())
             undone_task = find_task_by_name(connect, undone_name)
             if(not undone_task):
-                print(f"There is no such task as '{undone_task}' in a list!")
-                continue
+                print(f"There is no such task as '{undone_name}' in a list!")
+                
             else:
                 undone_task.mark_as_undone(connect)
             
@@ -261,12 +260,14 @@ def main():
             to_delete_task = find_task_by_name(connect, to_delete_name)
             if(not to_delete_task):
                 print(f"There is no such task as '{to_delete_name}' in a list!")
-                continue
+               
             else:
                 to_delete_task.delete_task(connect)
 
         elif(choice == '8'):
             clear_table(connect)
+
+        input("\nPress Enter to continue…")
 
 
     # task1 = Task("practice SQL")
@@ -281,6 +282,7 @@ def main():
     #     print(task)
 
     #clear_table(connect)
+    connect.close()
 
 
 

@@ -4,6 +4,6 @@
 /*.o
 /*.obj
 
-# Add any IDE/editor files you want to ignore:
+# IDE/editor files to ignore:
 *.swp
 *.vscode/
