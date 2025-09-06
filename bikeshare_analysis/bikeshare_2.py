@@ -1,3 +1,5 @@
+import datetime
+import calendar
 import time
 import pandas as pd
 import numpy as np
@@ -6,6 +8,7 @@ import re
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
+
 
 def get_filters():
     """
@@ -23,7 +26,7 @@ def get_filters():
         city = input("Enter the name of the city you want to explore (chicago, new york city, washington): \n")
         city = city.lower().strip()
         possible_city = {r'new york( city)?':'new york city', r'chicago':'chicago', 
-                         r'washington( city)': 'washington'}
+                         r'washington( city)?': 'washington'}
 
         flag = False
         for pos_city, norm_city in possible_city.items():
@@ -68,7 +71,7 @@ def get_filters():
                             r'sat(urday)?':'saturday', r'sun(day)?':'sunday'}
         
         flag = False
-        for pos_dow, norm_dow in possible_dow:
+        for pos_dow, norm_dow in possible_dow.items():
             if(re.fullmatch(pos_dow, dow)):
                 dow = norm_dow
                 flag = True
@@ -94,9 +97,20 @@ def load_data(city, month, day):
     Returns:
         df - Pandas DataFrame containing city data filtered by month and day
     """
+    global CITY_DATA
+    MONTHS = {'january':1, 'february':2, 'march':3, 'april':4, 'may':5, 'june':6,
+              'july':7, 'august':8, 'september':9, 'october':10, 'november':11, 'december':12}
+    DAYS = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6}
+    
+    df = pd.read_csv(f'./{CITY_DATA[city]}', parse_dates=['Start Time', 'End Time'])
+    mask = pd.Series(True, index = df.index)
 
+    if(month!='all'):
+        mask &= (df['Start Time'].dt.month == MONTHS[month])
+    if(day!='all'):
+        mask &= (df['Start Time'].dt.dayofweek == DAYS[day])
 
-    return df
+    return df[mask]
 
 
 def time_stats(df):
