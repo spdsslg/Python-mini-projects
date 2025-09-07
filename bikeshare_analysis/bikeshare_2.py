@@ -103,14 +103,20 @@ def load_data(city, month, day):
     DAYS = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6}
     
     df = pd.read_csv(f'./{CITY_DATA[city]}', parse_dates=['Start Time', 'End Time'])
-    mask = pd.Series(True, index = df.index)
+    df['Start Time'] = pd.to_datetime(df['Start Time'])
+    df['month'] = df['Start Time'].dt.month
+    df['day_of_week'] = df['Start Time'].dt.dayofweek
 
     if(month!='all'):
-        mask &= (df['Start Time'].dt.month == MONTHS[month])
+        months = ['january', 'february', 'march', 'april', 'may', 'june']
+        month = months.index(month)+1
+        df = df[df['month'] == month]
+    
     if(day!='all'):
-        mask &= (df['Start Time'].dt.dayofweek == DAYS[day])
+        days = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6}
+        df = df[df['day_of_week'] == days[day]]
 
-    return df[mask]
+    return df
 
 
 def time_stats(df):
@@ -120,13 +126,13 @@ def time_stats(df):
     start_time = time.time()
 
     # display the most common month
-
+    print(f"Most common month: {calendar.month_name[df['Start Time'].dt.month.mode()[0]]}") 
 
     # display the most common day of week
-
+    print(f"Most common day of week: {calendar.day_name[df['Start Time'].dt.dayofweek.mode()[0]]}")
 
     # display the most common start hour
-
+    print(f"Most common start hour: {df['Start Time'].dt.hour.mode()[0]}")
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
