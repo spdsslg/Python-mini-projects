@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import numpy as np
 import re
+import math
 
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
@@ -45,9 +46,9 @@ def get_filters():
     while(True):
         month = input("Enter a month you want to get data on (all, january, february...): \n")
         month = month.lower().strip()
-        possible_months = {r'all( months)?': 'all', r'jan(uary)?':'january', r'feb(ruary)?':'february', r'mar(ch)?':'march',
-                           r'apr(il)?':'april', 'may':'may', r'jun(e)?':'june', r'jul(y)?':'july', r'aug(ust)?':'august',
-                           r'sep(tember)?':'september', r'oct(ober)?':'october', r'nov(ember)?':'november', r'dec(ember)?':'december'}
+        possible_months = {r'all( months)?': 'all', r'jan(uary)?|([0]?1)':'january', r'feb(ruary)?|([0]?2)':'february', r'mar(ch)?|([0]?3)':'march',
+                           r'apr(il)?|([0]?4)':'april', r'may|([0]?5)':'may', r'jun(e)?|([0]?6)':'june', r'jul(y)?|([0]?7)':'july', r'aug(ust)?|([0]?8)':'august',
+                           r'sep(tember)?|([0]?9)':'september', r'oct(ober)?|(10)':'october', r'nov(ember)?|(11)':'november', r'dec(ember)?|(12)':'december'}
         
         flag = False
         for pos_mon,norm_mon in possible_months.items():
@@ -66,9 +67,9 @@ def get_filters():
     while(True):
         dow = input("Enter a day of the week you want to get a data on (all, monday, tuesday,): \n")
         dow = dow.lower().strip()
-        possible_dow = {r'all( days)?':'all', r'mon(day)?':'monday', r'tue(sday)?':'tuesday', 
-                            r'wed(nesday)?':'wednesday',r'thu(rsday)?':'thursday', r'fri(day)?':'friday',
-                            r'sat(urday)?':'saturday', r'sun(day)?':'sunday'}
+        possible_dow = {r'all( days)?':'all', r'mon(day)?|([0]?1)':'monday', r'tue(sday)?|([0]?2)':'tuesday', 
+                            r'wed(nesday)?|([0]?3)':'wednesday',r'thu(rsday)?|([0]?4)':'thursday', r'fri(day)?|([0]?5)':'friday',
+                            r'sat(urday)?|([0]?6)':'saturday', r'sun(day)?|([0]?7)':'sunday'}
         
         flag = False
         for pos_dow, norm_dow in possible_dow.items():
@@ -165,9 +166,13 @@ def trip_duration_stats(df):
     start_time = time.time()
 
     # display total travel time
-
+    total_time = str(datetime.timedelta(seconds=int(df['Trip Duration'].sum())))
+    h_min_sec_time = total_time.split(',')[-1].split(':')
+    print(f"Total travel time: {total_time.split(',')[0]},{h_min_sec_time[0]} hours, \
+{h_min_sec_time[1]} minutes, {h_min_sec_time[2]} seconds")
 
     # display mean travel time
+    print(f"Mean travel time (in hours:minutes:seconds): {datetime.timedelta(seconds = int(df['Trip Duration'].mean()))}")
 
 
     print("\nThis took %s seconds." % (time.time() - start_time))
@@ -181,12 +186,16 @@ def user_stats(df):
     start_time = time.time()
 
     # Display counts of user types
-
+    print(f"Counts of user types: \n{df['User Type'].value_counts()}\n")
 
     # Display counts of gender
-
+    print(f"Counts of gender: \n{df['Gender'].value_counts()}\n")
 
     # Display earliest, most recent, and most common year of birth
+    print(f"Earliest year of birth: {df['Birth Year'].min()}\n")
+    print(f"Most recent year of birth: {df['Birth Year'].max()}\n")
+    print(f"Most common year of birth: {df['Birth Year'].mode()[0]}\n")
+    print(f"Mean year of birth: {math.floor(df['Birth Year'].mean())}")
 
 
     print("\nThis took %s seconds." % (time.time() - start_time))
