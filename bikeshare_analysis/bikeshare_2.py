@@ -47,8 +47,7 @@ def get_filters():
         month = input("Enter a month you want to get data on (all, january, february...): \n")
         month = month.lower().strip()
         possible_months = {r'all( months)?': 'all', r'jan(uary)?|([0]?1)':'january', r'feb(ruary)?|([0]?2)':'february', r'mar(ch)?|([0]?3)':'march',
-                           r'apr(il)?|([0]?4)':'april', r'may|([0]?5)':'may', r'jun(e)?|([0]?6)':'june', r'jul(y)?|([0]?7)':'july', r'aug(ust)?|([0]?8)':'august',
-                           r'sep(tember)?|([0]?9)':'september', r'oct(ober)?|(10)':'october', r'nov(ember)?|(11)':'november', r'dec(ember)?|(12)':'december'}
+                           r'apr(il)?|([0]?4)':'april', r'may|([0]?5)':'may', r'jun(e)?|([0]?6)':'june'}
         
         flag = False
         for pos_mon,norm_mon in possible_months.items():
@@ -60,7 +59,7 @@ def get_filters():
             break
         else:
             print("Oops.. There is no such month as {}!".format(month))
-            print("Try enetering a month again\n")       
+            print("Please enter a month from January to June inclusive (you can enter in int format [1,2,...])!\n")     
 
     # get user input for day of week (all, monday, tuesday, ... sunday)
     dow = ''
@@ -81,7 +80,7 @@ def get_filters():
             break
         else:
             print("Oops.. There is no such day as {}!".format(dow))
-            print("Try enetering a day again\n") 
+            print("Please enter a day from Monday to Sunday inclusive (you can enter in int format [1,2,...])\n")
 
     print('-'*40)
     return city, month, dow
@@ -192,15 +191,43 @@ def user_stats(df):
     print(f"Counts of gender: \n{df['Gender'].value_counts()}\n")
 
     # Display earliest, most recent, and most common year of birth
-    print(f"Earliest year of birth: {df['Birth Year'].min()}\n")
-    print(f"Most recent year of birth: {df['Birth Year'].max()}\n")
-    print(f"Most common year of birth: {df['Birth Year'].mode()[0]}\n")
+    print(f"Earliest year of birth: {df['Birth Year'].min()}")
+    print(f"Most recent year of birth: {df['Birth Year'].max()}")
+    print(f"Most common year of birth: {df['Birth Year'].mode()[0]}")
     print(f"Mean year of birth: {math.floor(df['Birth Year'].mean())}")
 
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
+def chunker(df, beg, size):
+    return df.iloc[beg:beg+size]
+
+def see_head(df):
+    choice = input("Do you want to see the first 5 rows? (yes/no): ").strip()
+    if(choice.lower()!='yes'):
+        return 
+
+    length = len(df.index)
+    size = 0
+    cur_pos = 0
+    while(True):
+        size = min(length-cur_pos, 5)
+        for idx, row in df.iloc[cur_pos:cur_pos+size].iterrows():
+            print('{',f"'':'{idx}'")
+            print(f" 'Birth Year': '{row['Birth Year']}'")
+            print(f" 'End Station': '{row['End Station']}'")
+            print(f" 'Gender': '{row['Gender']}'")
+            print(f" 'Start Station': '{row['Start Station']}'")
+            print(f" 'Start Time': '{row['Start Time']}'")
+            print(f" 'Trip Duration': {row['Trip Duration']}")
+            print(f" 'User Type': {row['User Type']}", '}')
+        print('\n')
+        cur_pos += size
+        choice = input(f"...Do you want to see next {min(length-cur_pos, 5)} rows? (yes/no): ")
+        if(choice.lower()!='yes'):
+            return
+        print('\n', '.'*10, '\n')
 
 def main():
     while True:
@@ -211,6 +238,7 @@ def main():
         station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
+        see_head(df)
 
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
