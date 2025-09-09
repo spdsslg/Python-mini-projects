@@ -5,10 +5,15 @@ import pandas as pd
 import numpy as np
 import re
 import math
+import matplotlib.pyplot as plt
+from pathlib import Path
 
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
+
+OUT = Path(__file__).resolve().parent/"out"
+OUT.mkdir(exist_ok=True)
 
 
 def get_filters():
@@ -157,6 +162,32 @@ def station_stats(df):
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
+def compare_frequency():
+    """Creates a plot with three graphs with the comparison of number of rentals per day for three cities"""
+    chicago = pd.read_csv('./chicago.csv', usecols=['Start Time'])
+    new_york = pd.read_csv('./new_york_city.csv',usecols=['Start Time'], parse_dates=True)
+    washington = pd.read_csv('./washington.csv', usecols=['Start Time'], parse_dates=True)
+
+    chicago_daily = pd.to_datetime(chicago['Start Time']).dt.floor("D").value_counts().sort_index()
+    new_york_daily = pd.to_datetime(new_york['Start Time']).dt.floor("D").value_counts().sort_index()
+    washington_daily = pd.to_datetime(washington['Start Time']).dt.floor("D").value_counts().sort_index()
+
+    full_chicago = pd.date_range(chicago_daily.index.min(), chicago_daily.index.max(), freq='D')
+    full_new_york_daily = pd.date_range(new_york_daily.index.min(), new_york_daily.index.max(), freq='D')
+    full_washington = pd.date_range(washington_daily.index.min(), washington_daily.index.max(), freq='D')
+
+    chicago_daily = chicago_daily.reindex(full_chicago, fill_value=0)
+    new_york_daily = new_york_daily.reindex(full_new_york_daily, fill_value=0)
+    washington_daily = washington_daily.reindex(full_washington, fill_value=0)
+
+    plt.plot(chicago_daily.rolling(7).mean())
+    plt.plot(new_york_daily.rolling(7).mean())
+    plt.plot(washington_daily.rolling(7).mean())
+
+    plt.legend(['Chicago', 'New York City', 'Washington'])
+    plt.title("Comparison of the mean of rentals per 7 day window")
+    plt.savefig(OUT/'full_comparison.png')
+
 
 def trip_duration_stats(df):
     """Displays statistics on the total and average trip duration."""
@@ -239,6 +270,7 @@ def main():
         trip_duration_stats(df)
         user_stats(df)
         see_head(df)
+        compare_frequency()
 
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
